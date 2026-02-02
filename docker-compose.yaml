@@ -1,0 +1,23 @@
+version: "3"
+services:
+  backend_todo:
+    build: ./backend
+    container_name: cont-todo-be
+    env_file:
+      - ./backend/.env
+    ports:
+      - 8000:8000
+    networks:
+      - network_01
+
+  frontend_todo:
+    build: ./frontend
+    container_name: cont-todo-fe
+    ports:
+      - 3000:3000
+    networks:
+      - network_01
+
+networks:
+  network_01:
+    external: true
