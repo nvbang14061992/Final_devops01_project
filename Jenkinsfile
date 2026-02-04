@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        SSH_IP = ''
         DEPLOY_PATH = '/root/Final_devops01_project'
     }
 
@@ -22,6 +21,7 @@ pipeline {
                                 docker-compose down
                                 docker-compose build
                                 docker-compose up -d
+                                docker images -f "dangling=true" -q | xargs docker rmi
                             '
                         """
                     }
