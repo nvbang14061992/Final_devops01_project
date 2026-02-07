@@ -43,6 +43,8 @@ ansible: replace the ip in the host.ini
 
 run ansible command
 
+- Note: create encryption for ansible to hide the trasfer files with this command "ansible-vault create secrets.yml"
+
 # Step 3: Check docker container of jenkins and mongodb on vps
 
 # Step 4: Install plugins for jenkins
@@ -75,6 +77,7 @@ example: http://146.190.105.244:9090/targets
 
 # Connect Grafana to prometheus
 
+use url: http://VPS_IP:3001/ to see grafana page
 Connection> Data sources> + Add new data source> Connection>input the string http://prometheus:9090/
 
 > Save & Test> if OK> Data sources (again)
