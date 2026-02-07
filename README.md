@@ -49,6 +49,9 @@ run ansible command
 
 # Step 4: Install plugins for jenkins
 
+Note: alternatively, you can use the github action flow for installing the source code for the todo project, I put the flow file here:
+[the git hub action file](main.yaml)
+
 # Step 5: add pipeline for build jenkins file from remove
 
 - add credential for vps ssh (SSH Username with private key)
