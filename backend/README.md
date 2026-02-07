@@ -56,6 +56,10 @@ run ansible command
 - add credential for github webhook (secret text)
   - add secret id of webhook-secret to Github config (Advanced/Shared secret)
 
+- Note:
+  - replace branch in config of pipeline master -> main
+  - remember to tick to "GitHub hook trigger for GITScm polling" in pipeline config
+
 # Step 6: replace url of webhook on github webhook
 
 usual url: http://VPS_IP:8080/github-webhook/
