@@ -81,4 +81,4 @@ Connection> Data sources> 🪟 Build a dashboard (inside the prometheus source)>
 
 # Trigger push request from local PC
 
-we changed vps ip inside the axios of FE, thus we have new commit to push.
+we changed vps ip inside the axios of FE, thus we have new commit to push
