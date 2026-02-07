@@ -1,0 +1,7 @@
+token = "token_of_your_digitalocean_account"
+public_key = "your_ssh_public_key_here"
+minimal_vps = "s-1vcpu-1gb"
+standard_vps = "s-1vcpu-2gb"
+highmem_vps = "s-2vcpu-4gb"
+linux_image = "ubuntu-24-04-x64"
+regionSingapore = "sgp1"

@@ -1,0 +1,98 @@
+- name: Playbook demo
+  hosts: list_hosts
+  become: yes
+  vars_files:
+    - group_vars/all/secret.yml
+
+  tasks:
+    - name: install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: install Docker Compose
+      shell: curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+    - name: set execute permission for docker-compose
+      shell: chmod 755 /usr/local/bin/docker-compose
+
+    - name: clone final project todo repository
+      git:
+        repo: "https://github.com/nvbang14061992/Final_devops01_project.git"
+        dest: /root/Final_devops01_project
+        force: yes
+
+    - name: Ensure directory exists
+      ansible.builtin.file:
+        path: /root/Final_devops01_project/backend/
+        state: directory
+        mode: "0755"
+
+    - name: create .env from template and set read only write only for owner (root)
+      ansible.builtin.template:
+        src: templates/env.j2
+        dest: /root/Final_devops01_project/backend/.env
+        mode: "0600"
+
+    - name: create docker network
+      shell: docker network create network_01
+
+    - name: install mongodb container and bind to network_01
+      shell: docker run -d --network network_01 --name mongodb-todo -p 27017:27017 -e MONGO_INITDB_DATABASE=todo mongo
+
+    - name: install Jenkins
+      shell: docker run -d --name jenkins -p 8080:8080 -p 50000:50000 jenkins/jenkins:lts
+
+    - name: install Grafana
+      shell: docker run -d --name=grafana -p 3001:3000 --network network_01 grafana/grafana
+
+    - name: create directories for prometheus
+      shell: |
+        cd /root
+        mkdir prometheus
+
+    - name: copy prometheus.yml from template to host
+      ansible.builtin.copy:
+        src: prometheus.yml
+        dest: /root/prometheus/prometheus.yml
+
+    - name: install Prometheus
+      shell: |
+        cd /root
+        docker run --name prometheus -d -p 9090:9090 --network network_01 -v $(pwd)/prometheus:/etc/prometheus/ prom/prometheus
+        docker run -d --name host-node-exporter --net="network_01" -p 9100:9100 prom/node-exporter
+        cd prometheus
+        mkdir rules
+        mkdir cd ../..
+        mkdir alertmanager
+
+    - name: check content of file prometheus.yml inside container
+      become: yes
+      ansible.builtin.shell: "docker exec prometheus cat /etc/prometheus/prometheus.yml"
+      register: prometheus_conf # Lưu kết quả vào biến này
+
+    - name: Display content of the prometheus.yml on the screen
+      ansible.builtin.debug:
+        msg: "{{ prometheus_conf.stdout }}"
+
+    - name: check content of the file
+      ansible.builtin.assert:
+        that:
+          - "'job_name' in prometheus_conf.stdout"
+        fail_msg: "File cấu hình thiếu thông tin quan trọng!"
+
+    - name: copy alert rules file to prometheus container
+      ansible.builtin.copy:
+        src: rules/alert-rules.yml
+        dest: /root/prometheus/rules/alert-rules.yml
+
+    - name: copy alertmanager config file to alertmanager container
+      ansible.builtin.copy:
+        src: arlertmanager.yml
+        dest: /root/alertmanager/arlertmanager.yml
+
+    - name: install alert exporter for sending alerts
+      shell: docker run --name alertmanager --net="network_01" -d -p 9093:9093 -v $(pwd)/alertmanager/arlertmanager.yml:/etc/alertmanager/arlertmanager.yml prom/alertmanager
+# commands:
+# ansible-playbook -i host.ini install_vps.yml --ask-vault-pass
+# docker exec prometheus cat /etc/prometheus/prometheus.yml
